@@ -9,7 +9,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # log 출력 형식
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - [%(levelname)s  ] - %(message)s')
 
 # log 출력
 stream_handler = logging.StreamHandler()
@@ -43,7 +43,7 @@ def stringcheck(tableDictionary):
                 key=findKey(tableDictionary,string)
                 tableDictionary[key]=modifyStr
                 modifyKeyList.append(key)
-                logger.info(string)
+                logger.info("바뀔문장 : {0}".format(string))
 
             #""을 찾으면 "제거
             if string.find("\"\"") != -1:
@@ -51,7 +51,7 @@ def stringcheck(tableDictionary):
                 key=findKey(tableDictionary,string)
                 tableDictionary[key]=modifyStr
                 modifyKeyList.append(key)
-                logger.info(string)
+                logger.info("바뀔문장 : {0}".format(string))
 
     return modifyKeyList
 
@@ -129,7 +129,6 @@ tableList=[
 'tn_pubr_public_unmanned_traffic_camera_api',
 ]
 
-
 for table in tableList:
     try:
         query = "desc {0}".format(table)
@@ -144,7 +143,6 @@ for table in tableList:
             columList.append(colum[0])
 
         query = "select * from {0}".format(table)
-        #query = "select _id, rdnmadr from tn_pubr_public_prhsmk_zn_api where rdnmadr  like '%''%' limit 100"
         cur.execute(query)
 
         rows = cur.fetchall()
@@ -154,12 +152,12 @@ for table in tableList:
             modifyKeyList = stringcheck(tableDictionary)
             for colum in modifyKeyList:
                 updateQuery = "update {0} set {1} ='{2}'".format(table,colum,tableDictionary[colum])
-                logger.info("_ID : {0} TABLE : {1} QUERY : {2}".format(row[0], table, updateQuery))
+                logger.info("_ID : {0}".format(row[0]))
+                logger.info("TABLE : {0}".format(table))
+                logger.info("QUERY : {0}".format(updateQuery))
+                logger.info("=========================================================================")
+                
         
         tableDictionary.clear()
-
-
     except Exception as e:
         print(e)
-
-print("끝")
