@@ -1,5 +1,26 @@
 import re
 import CUBRIDdb
+import logging
+
+# 로그 생성
+logger = logging.getLogger()
+
+# 로그의 출력 기준 설정
+logger.setLevel(logging.INFO)
+
+# log 출력 형식
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# log 출력
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
+# log를 파일에 출력
+file_handler = logging.FileHandler('my.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
 
 def makingDictionary(tableDictionary, row , columList) :
     for colum,index in zip(columList,range(len(row))) :
@@ -22,7 +43,7 @@ def stringcheck(tableDictionary):
                 key=findKey(tableDictionary,string)
                 tableDictionary[key]=modifyStr
                 modifyKeyList.append(key)
-                print(string)
+                logger.info(string)
 
             #""을 찾으면 "제거
             if string.find("\"\"") != -1:
@@ -30,7 +51,7 @@ def stringcheck(tableDictionary):
                 key=findKey(tableDictionary,string)
                 tableDictionary[key]=modifyStr
                 modifyKeyList.append(key)
-                print(string)
+                logger.info(string)
 
     return modifyKeyList
 
@@ -118,6 +139,7 @@ for table in tableList:
         tableDictionary={}
         modifyKeyList=[]
 
+
         for colum in columnRow:
             columList.append(colum[0])
 
@@ -126,12 +148,13 @@ for table in tableList:
         cur.execute(query)
 
         rows = cur.fetchall()
+
         for row in rows:
             makingDictionary(tableDictionary,row,columList)
             modifyKeyList = stringcheck(tableDictionary)
             for colum in modifyKeyList:
                 updateQuery = "update {0} set {1} ='{2}'".format(table,colum,tableDictionary[colum])
-                print(updateQuery)    
+                logger.info("_ID : {0} TABLE : {1} QUERY : {2}".format(row[0], table, updateQuery))
         
         tableDictionary.clear()
 
@@ -140,24 +163,3 @@ for table in tableList:
         print(e)
 
 print("끝")
-
-# query = "desc tn_pubr_public_prhsmk_zn_api"
-# cur.execute(query)
-# columnRow = cur.fetchall()
-# columList=[]
-# tableDictionary={}
- 
-# for colum in columnRow:
-#     columList.append(colum[0])
-
-# query = "select _id, rdnmadr from tn_pubr_public_prhsmk_zn_api where rdnmadr  like '%''%' limit 100"
-# cur.execute(query)
-
-# row = cur.fetchone()
-        
-# tableDictionary=makingDictionary(tableDictionary,row,columList)
-# print(tableDictionary)
-# stringcheck(tableDictionary)
-# print(tableDictionary)
-
-#conn.commit()
