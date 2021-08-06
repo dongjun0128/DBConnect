@@ -1,9 +1,11 @@
 import re
 import CUBRIDdb
 import logging
+from datetime import datetime
 from flask import Flask
 
- # 로그 생성
+
+# 로그 생성
 logger = logging.getLogger()
 
 # 로그의 출력 기준 설정
@@ -17,11 +19,13 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
+today=datetime.today()
+
+
 # log를 파일에 출력
-file_handler = logging.FileHandler('my.log')
+file_handler = logging.FileHandler('{0}.log'.format(str(datetime.today())[:10]))
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-
 
 app = Flask(__name__)
 
@@ -30,42 +34,42 @@ def home():
     return 'Hello, World!!'
 
 
-def makingDictionary(tableDictionary, row , columList) :
+def making_dictionary(table_dictionary, row , columList) :
     for colum,index in zip(columList,range(len(row))) :
-        tableDictionary[colum]=row[index]
+        table_dictionary[colum]=row[index]
 
-def findKey(dict, val):
+def find_key(dict, val):
   return next(key for key, value in dict.items() if value == val)
 
-def stringcheck(tableDictionary):
+def string_check(table_dictionary):
 
-    dicValues=list(tableDictionary.values())
-    modifyKeyList=[]
+    dic_values=list(table_dictionary.values())
+    modify_key_list=[]
 
-    for string in dicValues:
+    for string in dic_values:
         if(type(string)==type("")):
             #'' 를 찾으면 ''제거
             string = str(string)
             if(string.find("\'\'") != -1):
-                modifyStr = re.sub("\'","",string)
-                key=findKey(tableDictionary,string)
-                tableDictionary[key]=modifyStr
-                modifyKeyList.append(key)
+                modify_str = re.sub("\'","",string)
+                key=find_key(table_dictionary,string)
+                table_dictionary[key]=modify_str
+                modify_key_list.append(key)
                 logger.info("바뀔문장 : {0}".format(string))
 
             #""을 찾으면 "제거
             if string.find("\"\"") != -1:
-                modifyStr = re.sub("\"","",string)
-                key=findKey(tableDictionary,string)
-                tableDictionary[key]=modifyStr
-                modifyKeyList.append(key)
+                modify_str = re.sub("\"","",string)
+                key=find_key(table_dictionary,string)
+                table_dictionary[key]=modify_str
+                modify_key_list.append(key)
                 logger.info("바뀔문장 : {0}".format(string))
 
-    return modifyKeyList
+    return modify_key_list
 
 
-@app.route('/aaa')
-def modifyRow():
+@app.route('/modify')
+def modify_row():
     
     #DB연결 
     conn = CUBRIDdb.connect('CUBRID:13.124.197.219:30000:IROSDB:::','soa','soa')
@@ -73,7 +77,7 @@ def modifyRow():
     #cursor는 fetch동작 관리, cur은 객체
     cur = conn.cursor()
 
-    tableList=[
+    table_list=[
     "tn_pubr_public_acdnt_area_api",
     "tn_pubr_public_aed_api",
     'tn_pubr_public_animal_cnter_api',
@@ -139,18 +143,18 @@ def modifyRow():
     'tn_pubr_public_unmanned_traffic_camera_api',
     ]
 
-    for table in tableList:
+    for table in table_list:
         try:
             query = "desc {0}".format(table)
             cur.execute(query)
-            columnRow = cur.fetchall()
-            columList=[]
-            tableDictionary={}
-            modifyKeyList=[]
+            column_row = cur.fetchall()
+            colum_list=[]
+            table_dictionary={}
+            modify_key_list=[]
 
 
-            for colum in columnRow:
-                columList.append(colum[0])
+            for colum in column_row:
+                colum_list.append(colum[0])
 
             query = "select * from {0}".format(table)
             cur.execute(query)
@@ -158,17 +162,17 @@ def modifyRow():
             rows = cur.fetchall()
 
             for row in rows:
-                makingDictionary(tableDictionary,row,columList)
-                modifyKeyList = stringcheck(tableDictionary)
-                for colum in modifyKeyList:
-                    updateQuery = "update {0} set {1} ='{2}'".format(table,colum,tableDictionary[colum])
+                making_dictionary(table_dictionary,row,colum_list)
+                modify_key_list = string_check(table_dictionary)
+                for colum in modify_key_list:
+                    updateQuery = "update {0} set {1} ='{2}'".format(table,colum,table_dictionary[colum])
                     logger.info("_ID : {0}".format(row[0]))
                     logger.info("TABLE : {0}".format(table))
                     logger.info("QUERY : {0}".format(updateQuery))
                     logger.info("=========================================================================")
                     
             
-            tableDictionary.clear()
+            table_dictionary.clear()
         except Exception as e:
             logger.warning(e)
     
