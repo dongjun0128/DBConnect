@@ -23,16 +23,11 @@ today=datetime.today()
 
 
 # log를 파일에 출력
-file_handler = logging.FileHandler('{0}.log'.format(str(datetime.today())[:10]))
+file_handler = logging.FileHandler('{0}.log'.format(str(datetime.today())[:10]),encoding='utf-8')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return 'Hello, World!!'
-
 
 def making_dictionary(table_dictionary, row , columList) :
     for colum,index in zip(columList,range(len(row))) :
@@ -66,6 +61,12 @@ def string_check(table_dictionary):
                 logger.info("바뀔문장 : {0}".format(string))
 
     return modify_key_list
+
+
+
+@app.route('/')
+def home():
+    return 'Hello, World!!'
 
 
 @app.route('/modify')
@@ -165,14 +166,15 @@ def modify_row():
                 making_dictionary(table_dictionary,row,colum_list)
                 modify_key_list = string_check(table_dictionary)
                 for colum in modify_key_list:
-                    updateQuery = "update {0} set {1} ='{2}'".format(table,colum,table_dictionary[colum])
+                    updateQuery = "update {0} set {1} ='{2}' where _id = {3}".format(table,colum,table_dictionary[colum],row[0])
                     logger.info("_ID : {0}".format(row[0]))
                     logger.info("TABLE : {0}".format(table))
                     logger.info("QUERY : {0}".format(updateQuery))
-                    logger.info("=========================================================================")
+                    logger.info("=========================================================================")    
                     
             
             table_dictionary.clear()
+
         except Exception as e:
             logger.warning(e)
     
@@ -182,5 +184,4 @@ def modify_row():
 
 #debug=True로 명시하면 해당 파일의 코드를 수정할 때 마다 Flask가 변경된 것을 인식하고 다시
 if __name__ == '__main__':
-    #local host 수정할 수 있나 보기
-    app.run(debug=True)
+    app.run(host = '192.168.0.154', port = '49152' ,debug=True)
