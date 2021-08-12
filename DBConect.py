@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from flask import Flask
 
-
+#08.12 리눅스 서버에서 코드 배포하기위해 준비(환경설정)
 # 로그 생성
 logger = logging.getLogger()
 
