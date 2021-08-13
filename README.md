@@ -6,3 +6,6 @@
 
 ## Install
 - pip install flask
+
+## import CUBRIDdb
+- https://www.cubrid.org/manual/ko/10.2/api/python.html
