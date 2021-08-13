@@ -184,4 +184,4 @@ def modify_row():
 
 #debug=True로 명시하면 해당 파일의 코드를 수정할 때 마다 Flask가 변경된 것을 인식하고 다시
 if __name__ == '__main__':
-    app.run(host = '192.168.0.154', port = '49152' ,debug=True)
+    app.run(host = '0.0.0.0', port = '49152' ,debug=True)
